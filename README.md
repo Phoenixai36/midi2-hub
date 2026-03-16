@@ -1,6 +1,7 @@
 # midi2-hub
 
 > **MIDI 2.0 AI Remix Hub** — Multi-producer sync over Network MIDI 2.0 with AI-powered remix engines.
+>  
 > Built for producers across cities and genres. Open source, modular, sprint-ready.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -16,53 +17,17 @@
 `midi2-hub` is a **modular hub** that connects music producers across the world using **Network MIDI 2.0** as the sync backbone, with **AI engines** (stem separation, audio-to-MIDI, pattern generation, emotional macros) running as isolated microservices.
 
 It is designed as:
+
 - A **Go server** (WebSocket + TUI) handling session management, clock consensus, clip routing
 - A **JUCE VST3/CLAP plugin** (C++17) acting as the DAW bridge for any producer
-- **Python microservices** (Podman containers) for AI: audio-to-MIDI, pattern generation, emotional engine
+- **Python microservices** (Podman containers) for AI: audio-to-midi, pattern generation, emotional engine
 - A **Network MIDI 2.0 layer** as the universal sync and control protocol
 
 ---
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    midi2-hub SERVER (Go)                     │
-│                                                             │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │ SessionMgr   │  │ TimeSyncCore │  │  ClipService     │  │
-│  │ rooms/routing│  │ consensus BPM│  │  JSON→SMF2       │  │
-│  └──────────────┘  └──────────────┘  └──────────────────┘  │
-│  ┌──────────────┐  ┌──────────────┐                         │
-│  │  WS Transport│  │  TUI (Bubble │                         │
-│  │  TLS/WSS     │  │  Tea)        │                         │
-│  └──────────────┘  └──────────────┘                         │
-└───────────────────────┬─────────────────────────────────────┘
-                        │ WebSocket + JSON (→ SMF2)
-        ┌───────────────┼───────────────┐
-        ▼               ▼               ▼
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│ JUCE Plugin  │ │ JUCE Plugin  │ │ JUCE Plugin  │
-│ Producer BCN │ │ Producer BER │ │ Producer TKY │
-│ VST3/CLAP    │ │ VST3/CLAP    │ │ VST3/CLAP    │
-│ Ableton/DAW  │ │ Bitwig/DAW   │ │ Reaper/DAW   │
-└──────┬───────┘ └──────────────┘ └──────────────┘
-       │
-       ▼ HTTP/WS
-┌─────────────────────────────────────┐
-│         AI Engines (Podman)         │
-│  ┌────────────┐ ┌────────────────┐  │
-│  │audio-to-   │ │ pattern-gen    │  │
-│  │midi        │ │ (text-to-groove│  │
-│  │(basic-pitch│ │  by style tag) │  │
-│  └────────────┘ └────────────────┘  │
-│  ┌─────────────────────────────┐    │
-│  │ emotional-engine            │    │
-│  │ (tension/density/brightness │    │
-│  │  → MIDI 2.0 CC 32-bit)     │    │
-│  └─────────────────────────────┘    │
-└─────────────────────────────────────┘
-```
+![Architecture Diagram](docs/architecture.svg)
 
 ---
 
@@ -86,221 +51,119 @@ It is designed as:
 
 ```
 midi2-hub/
-├── server/                    # Go Hub server
-│   ├── main.go
-│   ├── session/               # SessionManager: rooms, members, routing
-│   │   ├── manager.go
-│   │   └── room.go
-│   ├── transport/             # WebSocket server, TLS
-│   │   ├── server.go
-│   │   └── client.go
-│   ├── timesync/              # Consensus clock (Link-style)
-│   │   └── clock.go
-│   ├── clips/                 # Clip store JSON→SMF2
-│   │   └── store.go
-│   ├── bridge/                # Bridge to AI engines
-│   │   └── aibridge.go
-│   └── tui/                   # Bubble Tea TUI
-│       └── app.go
-├── plugin/                    # JUCE VST3/CLAP plugin (C++17)
+├── server/          # Go WebSocket + TUI hub
+│   ├── main.go      # Entry point + HTTP server
+│   ├── session/     # Room management, peer tracking
+│   ├── timesync/    # Clock consensus (Link-inspired)
+│   ├── transport/   # WebSocket / TLS handler
+│   └── tui/         # Bubble Tea interactive CLI
+├── plugin/          # JUCE VST3/CLAP (C++17)
 │   ├── CMakeLists.txt
-│   ├── PluginProcessor.cpp
-│   ├── PluginProcessor.h
-│   ├── PluginEditor.cpp
-│   ├── PluginEditor.h
-│   ├── HubClient.cpp          # WebSocket client → Go server
-│   ├── HubClient.h
-│   ├── Midi2Adapter.cpp       # ni-midi2 + libremidi I/O
-│   ├── Midi2Adapter.h
-│   └── LinkBridge.cpp         # Ableton Link peer (optional)
-├── engines/                   # AI microservices (Python/Podman)
+│   ├── src/PluginProcessor.cpp
+│   └── ... (JUCE submodule)
+├── engines/         # Python AI microservices
 │   ├── audio-to-midi/
-│   │   ├── main.py
-│   │   ├── requirements.txt
-│   │   └── Containerfile
-│   ├── pattern-gen/
-│   │   ├── main.py
-│   │   ├── requirements.txt
-│   │   └── Containerfile
-│   └── emotional-engine/
-│       ├── main.py
-│       ├── requirements.txt
-│       └── Containerfile
-├── deps/                      # Git submodules
-│   ├── ni-midi2/              # NI MIDI 2.0 C++ lib
-│   ├── libremidi/             # Cross-platform MIDI I/O
-│   ├── link/                  # Ableton Link
-│   └── JUCE/                  # JUCE framework
-├── CMakeLists.txt             # Root CMake (plugin + core)
-├── compose.yaml               # Podman Compose for AI engines
-├── .gitmodules                # All deps as submodules
-└── README.md
-```
-
----
-
-## Message Protocol (WebSocket + JSON)
-
-All messages between clients and server:
-
-```json
-{
-  "type": "clock|clip|control|join|leave",
-  "room": "room-id",
-  "client": "client-id",
-  "ts": 1710000000000,
-  "payload": {}
-}
-```
-
-### Examples
-
-```json
-// Clock consensus
-{ "type": "clock", "payload": { "bpm": 138.0, "beat": 4, "phase": 0.25 } }
-
-// MIDI 2.0 Clip (JSON MVP → SMF2 target)
-{ "type": "clip", "payload": { "slot": "drums", "notes": [], "resolution": 32 } }
-
-// Emotional macro (32-bit resolution)
-{ "type": "control", "payload": { "macro": "tension", "value": 0.87 } }
-
-// Join room
-{ "type": "join", "payload": { "room": "techno-bcn", "profile": "deck" } }
+│   ├── emotional-engine/
+│   └── pattern-gen/ (future)
+├── docs/            # Architecture diagrams, protocol specs
+└── docker-compose.yml
 ```
 
 ---
 
 ## Roadmap
 
-### Sprint 1 — Go server + TUI (1-2 weeks)
-- [ ] WebSocket server with rooms and members
-- [ ] Clock broadcast (host → all, consensus later)
-- [ ] Bubble Tea TUI: room list, clients, BPM
-- [ ] Test: 2 CLI instances sync over internet
+### ✅ Sprint 1: Core Infrastructure (Week 1-2)
+- [x] Go server skeleton (session + routing + TUI)
+- [x] JUCE plugin skeleton (MIDI I/O stub)
+- [x] Python engines scaffold (audio-to-midi, emotional)
+- [x] Docker compose setup
+- [x] GitHub CI (Go build/vet, Python syntax check)
 
-### Sprint 2 — Clock consensus + clips (1-2 weeks)
-- [ ] Distributed tempo consensus (Link-style logic)
-- [ ] Send/receive JSON clips between clients
-- [ ] TUI: show clips by slot, manual BPM change
+### 🚧 Sprint 2: Network MIDI 2.0 (Week 3-4)
+- [ ] UMP serialization (JSON → SMF2 conversion)
+- [ ] WebSocket MIDI message routing
+- [ ] Basic clock consensus (Link-style)
+- [ ] JUCE plugin ↔ Go server WebSocket handshake
 
-### Sprint 3 — JUCE plugin (2-3 weeks)
-- [ ] JUCE client connecting to Hub via WebSocket
-- [ ] Receives clock → syncs DAW transport
-- [ ] Sends/receives clip per slot (drums first)
-- [ ] Minimal UI: connect, room, slot selector
+### 🔮 Sprint 3: AI Integration (Week 5-6)
+- [ ] FastAPI endpoints for engines (audio-to-midi, emotional)
+- [ ] HTTP → MIDI 2.0 CC mapping (emotional macros)
+- [ ] Pattern generation prototype (text prompt → groove)
 
-### Sprint 4 — First AI engine + SMF2 (1-2 weeks)
-- [ ] Python container with `basic-pitch` endpoint
-- [ ] Hub calls it when client sends audio
-- [ ] Returns JSON clip → serialize to SMF2
-- [ ] Migrate clip format from JSON to SMF2
-
----
-
-## Dependencies (Git Submodules)
-
-| Submodule | Repo | Role |
-|-----------|------|------|
-| `deps/ni-midi2` | [midi2-dev/ni-midi2](https://github.com/midi2-dev/ni-midi2) | UMP parser, MIDI-CI, C++17 |
-| `deps/libremidi` | [celtera/libremidi](https://github.com/celtera/libremidi) | Cross-platform MIDI I/O |
-| `deps/link` | [Ableton/link](https://github.com/Ableton/link) | Ableton Link bridge |
-| `deps/JUCE` | [juce-framework/JUCE](https://github.com/juce-framework/JUCE) | VST3/CLAP plugin framework |
-
-```bash
-git clone --recurse-submodules https://github.com/Phoenixai36/midi2-hub
-```
+### 🎯 Sprint 4: MVP Polish (Week 7+)
+- [ ] TLS/WSS for internet deployment
+- [ ] Multi-producer session test (3+ cities)
+- [ ] Performance tuning (latency < 50ms)
+- [ ] Documentation + demo video
 
 ---
 
-## Quick Start (Sprint 1 — Server only)
+## Quick Start
+
+### Prerequisites
+- **Go 1.22+**
+- **CMake 3.22+** + C++17 compiler
+- **Python 3.11+**
+- **Podman** or **Docker**
+
+### 1. Clone + Dependencies
 
 ```bash
-# Clone with submodules
-git clone --recurse-submodules https://github.com/Phoenixai36/midi2-hub
-cd midi2-hub/server
-
-# Run server
-go mod tidy
-go run main.go
-
-# TUI launches automatically
-# Connect clients via WebSocket ws://localhost:8080/ws
-```
-
-### AI Engines (Podman)
-
-```bash
+git clone https://github.com/Phoenixai36/midi2-hub.git
 cd midi2-hub
-podman compose -f compose.yaml up
-# Engines available at:
-# audio-to-midi:    http://localhost:8001
-# pattern-gen:      http://localhost:8002
-# emotional-engine: http://localhost:8003
+
+# Add JUCE as submodule (for plugin)
+git submodule add https://github.com/juce-framework/JUCE plugin/JUCE
+git submodule update --init --recursive
 ```
 
-### Plugin Build (JUCE)
+### 2. Run Server + TUI
 
 ```bash
-cd midi2-hub
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-# VST3 output: build/plugin/midi2-hub_artefacts/VST3/
+cd server
+go mod download
+go run .
 ```
 
----
+The TUI will start on port `8080` (WebSocket hub).
 
-## Go Dependencies
+### 3. Build Plugin (VST3/Standalone)
 
 ```bash
-go get nhooyr.io/websocket
-go get github.com/charmbracelet/bubbletea
-go get github.com/charmbracelet/lipgloss
-go get github.com/google/uuid
-go get golang.org/x/crypto
+cd plugin
+mkdir build && cd build
+cmake ..
+cmake --build .
 ```
 
----
+Plugin outputs to `build/Midi2HubPlugin_artefacts/`.
 
-## Emotional Engine — Concept
+### 4. Start AI Engines (Podman)
 
-Beyond technical sync, `midi2-hub` includes an **Emotional Engine** layer:
-
-- Abstract macros: `tension`, `density`, `brightness`, `complexity`, `release`
-- Mapped to **32-bit resolution MIDI 2.0 CC** (per-note controllers)
-- AI engines condition pattern generation on emotional state
-- Use case: live sets with emotional narrative arcs (R3B0RN project)
-
-```
-Tension ──────────────────────── 0.87
-Density ────────────────── 0.65
-Brightness ──────── 0.32
-Complexity ─────────────────────── 0.91
-Release ──── 0.18
+```bash
+# From repo root
+podman-compose up
+# or: docker compose up
 ```
 
----
-
-## B2B Jam Mode
-
-Two producers in different cities share:
-- Clock/transport (Network MIDI 2.0)
-- Scene triggers and clip slots
-- An AI "third deck" that listens to both, proposes mashups and fills
-- Control via emotional macros from each side
+Engines available at:
+- `http://localhost:8001` (audio-to-midi)
+- `http://localhost:8002` (emotional-engine)
 
 ---
 
 ## Contributing
 
-This is an open project. If you work with MIDI 2.0, AI music tools, or live performance tech — PRs and issues welcome.
+Contributions welcome! This is an **open sprint** — pick any task from the [Roadmap](#roadmap) and submit a PR.
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feat/my-feature`)
+3. Commit with [Conventional Commits](https://conventionalcommits.org) (`feat:`, `fix:`, `docs:`)
+4. Push and open a PR
 
 ---
 
 ## License
 
 MIT — see [LICENSE](LICENSE)
-
----
-
-*Built in Barcelona. Designed for everywhere.*
