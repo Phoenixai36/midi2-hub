@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#161b22;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  
+  <!-- Title -->
+  <text x="600" y="40" font-family="monospace" font-size="28" fill="#58a6ff" text-anchor="middle" font-weight="bold">midi2-hub Architecture</text>
+  
+  <!-- Go Server (center top) -->
+  <rect x="400" y="80" width="400" height="180" rx="8" fill="#1f6feb" fill-opacity="0.15" stroke="#58a6ff" stroke-width="2"/>
+  <text x="600" y="110" font-family="monospace" font-size="18" fill="#58a6ff" text-anchor="middle" font-weight="bold">Go Server (WebSocket Hub)</text>
+  
+  <rect x="420" y="130" width="110" height="50" rx="4" fill="#238636" fill-opacity="0.2" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="475" y="160" font-family="sans-serif" font-size="12" fill="#c9d1d9" text-anchor="middle">SessionMgr</text>
+  
+  <rect x="545" y="130" width="110" height="50" rx="4" fill="#238636" fill-opacity="0.2" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="600" y="160" font-family="sans-serif" font-size="12" fill="#c9d1d9" text-anchor="middle">TimeSyncCore</text>
+  
+  <rect x="670" y="130" width="110" height="50" rx="4" fill="#238636" fill-opacity="0.2" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="725" y="160" font-family="sans-serif" font-size="12" fill="#c9d1d9" text-anchor="middle">ClipService</text>
+  
+  <rect x="470" y="200" width="90" height="40" rx="4" fill="#6e7681" fill-opacity="0.2" stroke="#8b949e" stroke-width="1.5"/>
+  <text x="515" y="225" font-family="sans-serif" font-size="11" fill="#c9d1d9" text-anchor="middle">WS/TLS</text>
+  
+  <rect x="640" y="200" width="90" height="40" rx="4" fill="#6e7681" fill-opacity="0.2" stroke="#8b949e" stroke-width="1.5"/>
+  <text x="685" y="225" font-family="sans-serif" font-size="11" fill="#c9d1d9" text-anchor="middle">TUI</text>
+  
+  <!-- JUCE Plugins (bottom row) -->
+  <rect x="100" y="350" width="180" height="120" rx="6" fill="#da3633" fill-opacity="0.15" stroke="#f85149" stroke-width="2"/>
+  <text x="190" y="380" font-family="monospace" font-size="14" fill="#ff7b72" text-anchor="middle" font-weight="bold">JUCE Plugin</text>
+  <text x="190" y="405" font-family="sans-serif" font-size="11" fill="#c9d1d9" text-anchor="middle">Barcelona</text>
+  <text x="190" y="430" font-family="sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">VST3 / CLAP</text>
+  <text x="190" y="450" font-family="sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">C++17</text>
+  
+  <rect x="510" y="350" width="180" height="120" rx="6" fill="#da3633" fill-opacity="0.15" stroke="#f85149" stroke-width="2"/>
+  <text x="600" y="380" font-family="monospace" font-size="14" fill="#ff7b72" text-anchor="middle" font-weight="bold">JUCE Plugin</text>
+  <text x="600" y="405" font-family="sans-serif" font-size="11" fill="#c9d1d9" text-anchor="middle">Berlin</text>
+  <text x="600" y="430" font-family="sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">VST3 / CLAP</text>
+  <text x="600" y="450" font-family="sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">C++17</text>
+  
+  <rect x="920" y="350" width="180" height="120" rx="6" fill="#da3633" fill-opacity="0.15" stroke="#f85149" stroke-width="2"/>
+  <text x="1010" y="380" font-family="monospace" font-size="14" fill="#ff7b72" text-anchor="middle" font-weight="bold">JUCE Plugin</text>
+  <text x="1010" y="405" font-family="sans-serif" font-size="11" fill="#c9d1d9" text-anchor="middle">Tokyo</text>
+  <text x="1010" y="430" font-family="sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">VST3 / CLAP</text>
+  <text x="1010" y="450" font-family="sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">C++17</text>
+  
+  <!-- AI Engines (right side) -->
+  <rect x="100" y="550" width="180" height="100" rx="6" fill="#bc8cff" fill-opacity="0.15" stroke="#d2a8ff" stroke-width="2"/>
+  <text x="190" y="580" font-family="monospace" font-size="13" fill="#d2a8ff" text-anchor="middle" font-weight="bold">audio-to-midi</text>
+  <text x="190" y="605" font-family="sans-serif" font-size="10" fill="#c9d1d9" text-anchor="middle">basic-pitch</text>
+  <text x="190" y="625" font-family="sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">Python/FastAPI</text>
+  
+  <rect x="510" y="550" width="180" height="100" rx="6" fill="#bc8cff" fill-opacity="0.15" stroke="#d2a8ff" stroke-width="2"/>
+  <text x="600" y="580" font-family="monospace" font-size="13" fill="#d2a8ff" text-anchor="middle" font-weight="bold">emotional-engine</text>
+  <text x="600" y="605" font-family="sans-serif" font-size="10" fill="#c9d1d9" text-anchor="middle">MIDI 2.0 CC macros</text>
+  <text x="600" y="625" font-family="sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">Python/FastAPI</text>
+  
+  <rect x="920" y="550" width="180" height="100" rx="6" fill="#bc8cff" fill-opacity="0.15" stroke="#d2a8ff" stroke-width="2"/>
+  <text x="1010" y="580" font-family="monospace" font-size="13" fill="#d2a8ff" text-anchor="middle" font-weight="bold">pattern-gen</text>
+  <text x="1010" y="605" font-family="sans-serif" font-size="10" fill="#c9d1d9" text-anchor="middle">(future)</text>
+  <text x="1010" y="625" font-family="sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">Python/FastAPI</text>
+  
+  <!-- Arrows -->
+  <path d="M 190 350 L 190 280 L 515 280 L 515 260" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 600 350 L 600 280 L 600 260" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 1010 350 L 1010 280 L 685 280 L 685 260" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  
+  <path d="M 190 470 L 190 540" stroke="#d2a8ff" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  <path d="M 600 470 L 600 540" stroke="#d2a8ff" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  <path d="M 1010 470 L 1010 540" stroke="#d2a8ff" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  
+  <!-- Legend -->
+  <text x="50" y="730" font-family="sans-serif" font-size="12" fill="#8b949e">Network MIDI 2.0 over WebSocket + JSON → SMF2</text>
+  <line x1="50" y1="745" x2="150" y2="745" stroke="#58a6ff" stroke-width="2"/>
+  
+  <text x="50" y="770" font-family="sans-serif" font-size="12" fill="#8b949e">AI Engine HTTP API (FastAPI)</text>
+  <line x1="50" y1="785" x2="150" y2="785" stroke="#d2a8ff" stroke-width="2" stroke-dasharray="5,5"/>
+  
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#58a6ff" />
+    </marker>
+  </defs>
+</svg>
