@@ -1,0 +1,43 @@
+# midi2-hub – full stack compose (Podman Compose compatible)
+# Usage: docker compose up   OR   podman-compose up
+
+services:
+
+  # ------------------------------------------------------------------
+  # Go session / timesync server + TUI
+  # ------------------------------------------------------------------
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"   # WebSocket / REST hub
+    environment:
+      - HUB_PORT=8080
+    restart: unless-stopped
+
+  # ------------------------------------------------------------------
+  # Python AI engine: audio → MIDI (basic-pitch)
+  # ------------------------------------------------------------------
+  audio-to-midi:
+    build:
+      context: ./engines
+      dockerfile: Dockerfile.audio-to-midi
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+
+  # ------------------------------------------------------------------
+  # Python AI engine: emotional macro → MIDI 2.0 CC
+  # ------------------------------------------------------------------
+  emotional-engine:
+    build:
+      context: ./engines
+      dockerfile: Dockerfile.emotional-engine
+    ports:
+      - "8002:8002"
+    restart: unless-stopped
+
+networks:
+  default:
+    name: midi2hub-net
